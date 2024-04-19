@@ -82,13 +82,14 @@ class GSuiteEmailBackend(BaseEmailBackend):
 
     def close(self):
         """Close the connection to the email server."""
-        if self.connection is None:
-            return
+        if self.connection is None: return
         # do something
-        self.connection.close()
+        try:
+            self.connection.close()
+        except:
+            pass
         self.connection = None
         self.current_user = None
-        return
 
     def _send(self, email_message):
         """A helper method that does the actual sending."""
@@ -96,10 +97,8 @@ class GSuiteEmailBackend(BaseEmailBackend):
             return False
         # check this
         message = email_message.message()
-        print("gsuite 1: "+str(message['from']))
         if email_message.bcc:
-            message['bcc'] = ','.join(map(str, email_message.bcc))
-        print("gsuite 2: "+str(message))
+            message['Bcc'] = ','.join(map(str, email_message.bcc))
         # https://developers.google.com/gmail/api/guides/sending#creating_messages
         raw = base64.urlsafe_b64encode(message.as_bytes())
         raw = raw.decode()
