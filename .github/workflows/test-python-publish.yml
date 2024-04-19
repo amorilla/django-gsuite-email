@@ -21,9 +21,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@master
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@master
       with:
         python-version: '3.x'
     - name: Install dependencies
@@ -38,4 +38,4 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository-url: https://test.pypi.org/legacy
+        repository_url: https://test.pypi.org/legacy
