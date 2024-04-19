@@ -14,13 +14,13 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'django-gsuite-email'
+NAME = 'djau-gsuite-email'
 DESCRIPTION = 'Send emails via a GSuite Service-account.'
 URL = 'https://github.com/slicefox/django-gsuite-email'
 EMAIL = 'adithya.webdev@gmail.com'
 AUTHOR = 'slicefox'
 REQUIRES_PYTHON = '>=3.0.0'
-VERSION = '0.1.2'
+VERSION = '0.1.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
