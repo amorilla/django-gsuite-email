@@ -3,7 +3,6 @@ import threading
 
 from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
-from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail.message import sanitize_address
 from google.auth import exceptions
 from google.oauth2 import service_account
@@ -37,6 +36,8 @@ class GSuiteEmailBackend(BaseEmailBackend):
         Send one or more EmailMessage objects and return the number of email
         messages sent.
         """
+        import re
+        
         if not email_messages:
             return 0
         with self._lock:
@@ -44,8 +45,7 @@ class GSuiteEmailBackend(BaseEmailBackend):
             for message in email_messages:
                 encoding = message.encoding or settings.DEFAULT_CHARSET
                 self.gmail_user = sanitize_address(message.from_email, encoding)
-                self.gmail_user = self.gmail_user.split(" ")[1]
-                self.gmail_user = self.gmail_user[1:len(self.gmail_user)-1]
+                self.gmail_user = re.findall(r"[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+", self.gmail_user)[0]
                 new_conn_created = self.open()
                 if not self.connection or new_conn_created is None:
                     # skip this message
@@ -53,6 +53,9 @@ class GSuiteEmailBackend(BaseEmailBackend):
                 sent = self._send(message)
                 if sent:
                     num_sent += 1
+            # not doing anything here
+            if new_conn_created:
+                self.close()
         return num_sent
 
     def open(self):
@@ -71,10 +74,12 @@ class GSuiteEmailBackend(BaseEmailBackend):
 
         try:
             self.close()
+            if self.connection is None: newConn=True
+            else: newConn=False
             self.current_user = self.gmail_user
             credentials = self._delegate_user(self.current_user)
             self.connection = build("gmail", "v1", credentials=credentials)
-            return True
+            return newConn
         except (exceptions.DefaultCredentialsError, exceptions.GoogleAuthError, exceptions.RefreshError, exceptions.TransportError):
             if not self.fail_silently:
                 self.close()
@@ -86,10 +91,14 @@ class GSuiteEmailBackend(BaseEmailBackend):
         # do something
         try:
             self.connection.close()
+            self.current_user = None
+            self.connection = None
         except:
-            pass
-        self.connection = None
-        self.current_user = None
+            self.current_user = None
+            self.connection = None
+            if self.fail_silently:
+                return
+            raise
 
     def _send(self, email_message):
         """A helper method that does the actual sending."""
@@ -106,7 +115,7 @@ class GSuiteEmailBackend(BaseEmailBackend):
         try:
             # need different login to check success
             self.connection.users().messages().send(
-                userId=self.gmail_user, body=binary_content).execute()
+                userId='me', body=binary_content).execute()
         except (exceptions.DefaultCredentialsError, exceptions.GoogleAuthError, exceptions.RefreshError, exceptions.TransportError):
             if not self.fail_silently:
                 raise
