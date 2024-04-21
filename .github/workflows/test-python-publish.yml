@@ -19,11 +19,7 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
-    
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/djau-gsuite-email
-      
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
@@ -33,14 +29,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -U google-api-python-client google-auth
         pip install build
+        python -m pip install -U google-api-python-client google-auth
+        
     - name: Build package
       run: python -m build
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
-        password: ${{ format('{0}{1}', 'pypi-', secrets.TEST) }}
+        password: ${{ format('{0}{1}', 'pypi-', secrets.TEST_PYPI_API_TOKEN) }}
         repository-url: https://test.pypi.org/legacy/
 
