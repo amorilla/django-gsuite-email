@@ -73,9 +73,9 @@ class GSuiteEmailBackend(BaseEmailBackend):
             return False
 
         try:
-            self.close()
             if self.connection is None: newConn=True
             else: newConn=False
+            self.close()
             self.current_user = self.gmail_user
             credentials = self._delegate_user(self.current_user)
             self.connection = build("gmail", "v1", credentials=credentials)
