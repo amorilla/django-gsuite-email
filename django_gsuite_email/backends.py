@@ -18,7 +18,7 @@ class GSuiteEmailBackend(BaseEmailBackend):
         
         self.fail_silently = fail_silently
         self.credentials = get_credentials_file()
-        self.API_SCOPE = ['https://www.googleapis.com/auth/gmail.send', ]
+        self.API_SCOPE = settings.GMAIL_SCOPES if settings.GMAIL_SCOPES else ['https://www.googleapis.com/auth/gmail.send', ]
         # to reopen connection with different delegation when user changes
         self.current_user = None
         self.connection = None
