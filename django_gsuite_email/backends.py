@@ -18,7 +18,7 @@ class GSuiteEmailBackend(BaseEmailBackend):
         
         self.fail_silently = fail_silently
         self.credentials = get_credentials_file()
-        self.API_SCOPE = ['https://www.googleapis.com/auth/gmail.send', 'https://www.googleapis.com/auth/gmail.readonly', ]
+        self.API_SCOPE = settings.GMAIL_SCOPES if settings.GMAIL_SCOPES else ['https://www.googleapis.com/auth/gmail.send', ]
         # to reopen connection with different delegation when user changes
         self.current_user = None
         self.connection = None
@@ -121,21 +121,4 @@ class GSuiteEmailBackend(BaseEmailBackend):
                 raise
             return False
         return True
-    
-    def getMessages(self):
-        from datetime import date, timedelta
-        self.open()
-        today = date.today()
-        last = today - timedelta(days=15)
-        # Dates have to formatted in YYYY/MM/DD format for gmail
-        query = "after: {0}".format(last.strftime('%Y/%m/%d'))
-        result = self.connection.users().messages().list(userId='me', q=query).execute()
-        messages = [ ]
-        if 'messages' in result:
-            messages.extend(result['messages'])
-        while 'nextPageToken' in result:
-            page_token = result['nextPageToken']
-            result = self.connection.users().messages().list(userId='me',q=query, pageToken=page_token).execute()
-            if 'messages' in result:
-                messages.extend(result['messages'])
-        return messages
+
