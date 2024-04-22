@@ -121,4 +121,3 @@ class GSuiteEmailBackend(BaseEmailBackend):
                 raise
             return False
         return True
-
