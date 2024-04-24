@@ -18,12 +18,13 @@ class GSuiteEmailBackend(BaseEmailBackend):
         
         self.fail_silently = fail_silently
         self.credentials = get_credentials_file()
-        self.API_SCOPE = settings.GMAIL_SCOPES if settings.GMAIL_SCOPES else ['https://www.googleapis.com/auth/gmail.send', ]
+        self.API_SCOPE = settings.GMAIL_SCOPES if hasattr(settings, 'GMAIL_SCOPES') else ['https://www.googleapis.com/auth/gmail.send', ]
         # to reopen connection with different delegation when user changes
         self.current_user = None
         self.connection = None
+        self.gmail_user = settings.GMAIL_USER if hasattr(settings, 'GMAIL_USER') else None
+        self.user_from_email = settings.GSUITE_USER_FROM_EMAIL if hasattr(settings, 'GSUITE_USER_FROM_EMAIL') else False
         self._lock = threading.RLock()
-        self.gmail_user = settings.GMAIL_USER
 
     def _delegate_user(self, user_id):
         credentials = service_account.Credentials.from_service_account_file(
@@ -43,9 +44,10 @@ class GSuiteEmailBackend(BaseEmailBackend):
         with self._lock:
             num_sent = 0
             for message in email_messages:
-                encoding = message.encoding or settings.DEFAULT_CHARSET
-                self.gmail_user = sanitize_address(message.from_email, encoding)
-                self.gmail_user = re.findall(r"[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+", self.gmail_user)[0]
+                if self.user_from_email:
+                    encoding = message.encoding or settings.DEFAULT_CHARSET
+                    self.gmail_user = sanitize_address(message.from_email, encoding)
+                    self.gmail_user = re.findall(r"[a-z0-9\.\-+_]+@[a-z0-9\.\-+_]+\.[a-z]+", self.gmail_user)[0]
                 new_conn_created = self.open()
                 if not self.connection or new_conn_created is None:
                     # skip this message

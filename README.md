@@ -37,9 +37,14 @@ EMAIL_BACKEND = 'django_gsuite_email.GSuiteEmailBackend'
 To do this, either set `GSUITE_CREDENTIALS_FILE` environment variable.\
 OR \
 set `GSUITE_CREDENTIALS_FILE` in `settings.py`
-````python
+
+```python
 GSUITE_CREDENTIALS_FILE="/path/to/credentials/file.json"
-````
+GSUITE_USER_FROM_EMAIL = False  # use the user of from_email if True. Default value False.
+GMAIL_USER = 'user@domain'      # default user if GSUITE_USER_FROM_EMAIL is not True. Default value None.
+GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.send', ... ] # Default value ['https://www.googleapis.com/auth/gmail.send', ]
+```
+
 > #### Note: `GSUITE_CREDENTIALS_FILE` in `settings.py` will take precedence over environment variable.
 
 #### 4. Send emails
