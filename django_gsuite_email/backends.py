@@ -66,6 +66,8 @@ class GSuiteEmailBackend(BaseEmailBackend):
         new connection was required (True or False) or None if an exception
         passed silently.
         """
+        
+        from django.core.exceptions import ImproperlyConfigured
         if not self.current_user:
             # first connection
             self.current_user = self.gmail_user
@@ -74,6 +76,10 @@ class GSuiteEmailBackend(BaseEmailBackend):
             # Nothing to do if the connection is already open for same delegation
             return False
 
+        if self.gmail_user is None:
+            if not self.fail_silently:
+                raise ImproperlyConfigured('GMAIL_USER mandatory, set it in settings')
+            return None
         try:
             if self.connection is None: newConn=True
             else: newConn=False
