@@ -29,9 +29,13 @@ def get_credentials_file():
         file_path = environ.get('GSUITE_CREDENTIALS_FILE')
         if check_file(file_path):
             return file_path
-    raise ImproperlyConfigured('GSUITE_CREDENTIALS_FILE is not set, set it in seetings or as environment variable')
+    raise ImproperlyConfigured('GSUITE_CREDENTIALS_FILE is not set, set it in settings or as environment variable')
 
 
 
 def check_ready():
+    gmail_user = settings.GMAIL_USER if hasattr(settings, 'GMAIL_USER') else None
+    user_from_email = settings.GSUITE_USER_FROM_EMAIL if hasattr(settings, 'GSUITE_USER_FROM_EMAIL') else False
+    if gmail_user is None and not user_from_email:
+        raise ImproperlyConfigured('GMAIL_USER mandatory if GSUITE_USER_FROM_EMAIL is not True, set it in settings')
     return bool(get_credentials_file())
