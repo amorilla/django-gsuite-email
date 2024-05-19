@@ -1,0 +1,4 @@
+venv/*
+build/*
+*.pyc
+django_gsuite_email.egg-info/*
